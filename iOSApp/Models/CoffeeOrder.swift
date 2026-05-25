@@ -14,4 +14,5 @@ struct CoffeeOrder: Identifiable, Codable {
     var size: String
     var sugar: Int
     var milk: Bool
+    var pickupTime: String
 }
