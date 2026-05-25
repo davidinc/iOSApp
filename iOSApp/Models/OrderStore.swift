@@ -1,7 +1,6 @@
 import Foundation
 import Combine
 
-// Central source of truth linking active orders and the reminder clock timer state
 class OrderStore: ObservableObject {
     @Published var orders: [CoffeeOrder] = [
         CoffeeOrder(
@@ -10,18 +9,16 @@ class OrderStore: ObservableObject {
             size: "Large",
             sugar: 2,
             milk: true,
-            pickupTime: "10 Mins"
-        ),
+            remainingSeconds: 600), // 10 mins
         CoffeeOrder(
             name: "John",
             drink: "French Vanilla",
             size: "Medium",
             sugar: 1,
             milk: false,
-            pickupTime: "10 Mins"
-        )
+            remainingSeconds: 900) // 15 mins
     ]
     
-    // Global shared parameter initialized to assignment default specification
-    @Published var globalPickupMinutes: Int = 10
+    // Shared initial baseline default value for new entries
+    @Published var globalDefaultMinutes: Int = 10
 }

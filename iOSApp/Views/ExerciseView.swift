@@ -2,84 +2,62 @@ import SwiftUI
 
 struct ExerciseView: View {
     @EnvironmentObject var store: OrderStore
-    @State private var isTimerRunning = false
-    @State private var timer: Timer? = nil
     
     var body: some View {
         VStack(spacing: 30) {
             Spacer()
             
-            Image(systemName: isTimerRunning ? "hourglass.badge.plus" : "clock.fill")
+            Image(systemName: store.orders.isEmpty ? "cup.and.saucer" : "clock.fill")
                 .font(.system(size: 90))
                 .foregroundColor(store.orders.isEmpty ? .gray : .orange)
-                .symbolEffect(.pulse, isActive: isTimerRunning)
             
             VStack(spacing: 8) {
-                Text("Active Run Reminder")
+                Text("Run Status Dashboard")
                     .font(.title)
                     .bold()
                 
-                Text(store.orders.isEmpty ? "No active team runs to track." : "Tracking reminder countdown for \(store.orders.count) orders.")
+                Text(store.orders.isEmpty ? "All runs finished. No active items." : "Monitoring \(store.orders.count) active independent team timers.")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 20)
             }
             
-            // Dynamic value component linked straight to data repository state
-            Text("\(store.globalPickupMinutes) Minutes")
-                .font(.system(size: 48, weight: .bold, design: .monospaced))
-                .foregroundColor(store.globalPickupMinutes <= 2 ? .red : .primary)
-            
-            if !isTimerRunning {
-                Stepper("Adjust Run Window", value: $store.globalPickupMinutes, in: 1...60)
-                    .padding(.horizontal, 40)
+            if !store.orders.isEmpty {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Live Overview Monitor:")
+                        .font(.caption)
+                        .bold()
+                        .foregroundColor(.secondary)
+                    
+                    ForEach(store.orders) { order in
+                        HStack {
+                            Text(order.name)
+                                .font(.body)
+                            Spacer()
+                            Text(formatTime(order.remainingSeconds))
+                                .font(.body.monospacedDigit())
+                                .bold()
+                                .foregroundColor(order.remainingSeconds == 0 ? .red : .orange)
+                        }
+                        .padding()
+                        .background(Color(.secondarySystemBackground))
+                        .cornerRadius(10)
+                    }
+                }
+                .padding(.horizontal, 30)
             }
-            
-            Button(action: toggleTimer) {
-                Text(isTimerRunning ? "Pause Reminder" : "Start Run Countdown")
-                    .font(.headline)
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(store.orders.isEmpty ? Color.gray : (isTimerRunning ? Color.gray : Color.orange))
-                    .foregroundColor(.white)
-                    .cornerRadius(12)
-            }
-            .padding(.horizontal, 40)
-            .disabled(store.orders.isEmpty)
             
             Spacer()
         }
         .padding()
-        .onDisappear {
-            stopTimer()
-        }
     }
     
-    private func toggleTimer() {
-        if isTimerRunning {
-            stopTimer()
-        } else {
-            startTimer()
-        }
-    }
-    
-    private func startTimer() {
-        isTimerRunning = true
-        // One second translates into a one-minute tick reduction for testing convenience
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
-            if store.globalPickupMinutes > 0 {
-                store.globalPickupMinutes -= 1
-            } else {
-                stopTimer()
-            }
-        }
-    }
-    
-    private func stopTimer() {
-        isTimerRunning = false
-        timer?.invalidate()
-        timer = nil
+    private func formatTime(_ totalSeconds: Int) -> String {
+        if totalSeconds == 0 { return "Ready" }
+        let mins = totalSeconds / 60
+        let secs = totalSeconds % 60
+        return String(format: "%02d:%02d", mins, secs)
     }
 }
 

@@ -35,10 +35,9 @@ struct AddOrderView: View {
                 }
                 
                 Section(header: Text("Pickup Window Setup")) {
-                    // Leverages shared reminder store context directly to maintain integration
                     Stepper(
-                        "Pickup In: \(store.globalPickupMinutes) Minutes",
-                        value: $store.globalPickupMinutes,
+                        "Pickup In: \(store.globalDefaultMinutes) Minutes",
+                        value: $store.globalDefaultMinutes,
                         in: 1...60
                     )
                 }
@@ -58,18 +57,20 @@ struct AddOrderView: View {
     }
     
     private func saveOrder() {
+        // Converted into seconds parameter storage (minutes * 60)
+        let totalSeconds = store.globalDefaultMinutes * 60
+        
         let newOrder = CoffeeOrder(
             name: name,
             drink: drink,
             size: size,
             sugar: sugar,
             milk: milk,
-            pickupTime: "\(store.globalPickupMinutes) Mins"
+            remainingSeconds: totalSeconds
         )
         
         store.orders.append(newOrder)
         
-        // Reset operational state fields cleanly while keeping time context synced
         name = ""
         drink = "Coffee"
         size = "Medium"
