@@ -1,13 +1,8 @@
-//
-//  AddOrderView.swift
-//  iOSApp
-//
-//  Created by Dawit Chernet on 2026-05-21.
-//
-
 import SwiftUI
 
 struct AddOrderView: View {
+    @EnvironmentObject var store: OrderStore
+    
     @State private var name = ""
     @State private var drink = "Coffee"
     @State private var size = "Medium"
@@ -18,37 +13,72 @@ struct AddOrderView: View {
     let sizes = ["Small", "Medium", "Large"]
     
     var body: some View {
-        Form {
-            Section(header: Text("Customer")) {
-                TextField("Name", text: $name)
-            }
-            
-            Section(header: Text("Order")) {
-                Picker("Drink", selection: $drink) {
-                    ForEach(drinks, id: \.self) {
-                        Text($0)
-                    }
+        NavigationStack {
+            Form {
+                Section(header: Text("Customer Information")) {
+                    TextField("Enter Name", text: $name)
+                        .autocorrectionDisabled()
                 }
                 
-                Picker("Size", selection: $size) {
-                    ForEach(sizes, id: \.self) {
-                        Text($0)
+                Section(header: Text("Drink Selection")) {
+                    Picker("Drink", selection: $drink) {
+                        ForEach(drinks, id: \.self) { Text($0) }
                     }
+                    
+                    Picker("Size", selection: $size) {
+                        ForEach(sizes, id: \.self) { Text($0) }
+                    }
+                    
+                    Stepper("Sugar: \(sugar)", value: $sugar, in: 0...5)
+                    
+                    Toggle("Add Milk", isOn: $milk)
                 }
                 
-                Stepper("Sugar: \(sugar)", value: $sugar, in: 0...5)
+                Section(header: Text("Pickup Window Setup")) {
+                    // Leverages shared reminder store context directly to maintain integration
+                    Stepper(
+                        "Pickup In: \(store.globalPickupMinutes) Minutes",
+                        value: $store.globalPickupMinutes,
+                        in: 1...60
+                    )
+                }
                 
-                Toggle("Milk", isOn: $milk)
+                Section {
+                    Button(action: saveOrder) {
+                        Text("Save Order")
+                            .frame(maxWidth: .infinity)
+                            .bold()
+                            .foregroundColor(name.isEmpty ? .secondary : .red)
+                    }
+                    .disabled(name.isEmpty)
+                }
             }
-            
-            Button("Save Order") {
-                // Save logic will be added later
-            }
+            .navigationTitle("Add Order")
         }
-        .navigationTitle("Add Order")
+    }
+    
+    private func saveOrder() {
+        let newOrder = CoffeeOrder(
+            name: name,
+            drink: drink,
+            size: size,
+            sugar: sugar,
+            milk: milk,
+            pickupTime: "\(store.globalPickupMinutes) Mins"
+        )
+        
+        store.orders.append(newOrder)
+        
+        // Reset operational state fields cleanly while keeping time context synced
+        name = ""
+        drink = "Coffee"
+        size = "Medium"
+        sugar = 1
+        milk = false
     }
 }
 
 #Preview {
     AddOrderView()
+        .environmentObject(OrderStore())
 }

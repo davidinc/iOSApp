@@ -2,13 +2,13 @@ import SwiftUI
 
 @main
 struct iOSApp: App {
-    
-    @StateObject var store = OrderStore()
+    // Single global context reference tracking source-of-truth updates
+    @StateObject private var orderStore = OrderStore()
     
     var body: some Scene {
         WindowGroup {
             WelcomeView()
-                .environmentObject(store)
+                .environmentObject(orderStore) // Spreads context reference explicitly down UI path
         }
     }
 }
