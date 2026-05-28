@@ -1,7 +1,11 @@
 import SwiftUI
 
+/// A form interface allowing users to input and submit new team coffee orders.
 struct AddOrderView: View {
     @EnvironmentObject var store: OrderStore
+    
+    // Allows this view to force the TabView back to the main list upon saving
+    @Binding var selectedTab: Int
     
     @State private var name = ""
     @State private var drink = "Coffee"
@@ -43,13 +47,13 @@ struct AddOrderView: View {
                 }
                 
                 Section {
-                    Button(action: saveOrder) {
-                        Text("Save Order")
+                    Button("Save Order") {
+                            saveOrder()
+                    }
                             .frame(maxWidth: .infinity)
                             .bold()
                             .foregroundColor(name.isEmpty ? .secondary : .red)
-                    }
-                    .disabled(name.isEmpty)
+                            .disabled(name.isEmpty)
                 }
             }
             .navigationTitle("Add Order")
@@ -76,10 +80,13 @@ struct AddOrderView: View {
         size = "Medium"
         sugar = 1
         milk = false
+        
+        // Go back to Orders tab
+        selectedTab = 0
     }
 }
 
 #Preview {
-    AddOrderView()
+    AddOrderView(selectedTab: .constant(1))
         .environmentObject(OrderStore())
 }

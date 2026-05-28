@@ -1,6 +1,7 @@
 import Foundation
 
-// Tracks individual countdown durations natively in seconds
+/// Represents an individual team member's coffee order.
+/// Conforms to `Identifiable` for dynamic iteration in SwiftUI lists.
 struct CoffeeOrder: Identifiable, Codable {
     var id = UUID()
     var name: String
@@ -8,5 +9,7 @@ struct CoffeeOrder: Identifiable, Codable {
     var size: String
     var sugar: Int
     var milk: Bool
-    var remainingSeconds: Int // Each order manages its own ticking timeline
+    
+    /// The remaining duration in seconds before the order is ready for pickup.
+    var remainingSeconds: Int
 }

@@ -21,4 +21,5 @@ class OrderStore: ObservableObject {
     
     // Shared initial baseline default value for new entries
     @Published var globalDefaultMinutes: Int = 10
+    
 }
